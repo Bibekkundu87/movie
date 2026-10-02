@@ -84,7 +84,7 @@ In StreamBox, **Google Drive is the single source of truth** for your video libr
 
 ---
 
-## Environment Configuration
+<!-- ## Environment Configuration
 
 Create a `.env.local` file in the project root:
 
@@ -103,7 +103,7 @@ GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAAS
 
 # Metadata Cache TTL in milliseconds (default: 15 seconds)
 METADATA_CACHE_TTL_MS=15000
-```
+``` -->
 
 ---
 
