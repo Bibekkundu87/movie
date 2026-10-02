@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141419" />
+      <stop offset="50%" stop-color="#1B1B22" />
+      <stop offset="100%" stop-color="#0E0E12" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF3B4F" />
+      <stop offset="100%" stop-color="#B81426" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#EF3B4F" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#EF3B4F" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="360" fill="url(#bg)" />
+
+  <!-- Subtle Ambient Glow -->
+  <circle cx="320" cy="180" r="180" fill="url(#glow)" />
+
+  <!-- Center Icon Frame -->
+  <circle cx="320" cy="165" r="44" fill="#24242E" stroke="#333340" stroke-width="2" />
+  
+  <!-- Play Glyph -->
+  <polygon points="314,149 334,165 314,181" fill="url(#accent)" />
+
+  <!-- Typography -->
+  <text x="320" y="235" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="600" fill="#E4E4EB" text-anchor="middle" letter-spacing="1.5">STREAMBOX</text>
+  <text x="320" y="255" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#717180" text-anchor="middle" letter-spacing="0.5">Google Drive Video</text>
+
+  <!-- Corner Borders -->
+  <path d="M 20,40 L 20,20 L 40,20" stroke="#2D2D3A" stroke-width="2" fill="none" />
+  <path d="M 620,40 L 620,20 L 600,20" stroke="#2D2D3A" stroke-width="2" fill="none" />
+  <path d="M 20,320 L 20,340 L 40,340" stroke="#2D2D3A" stroke-width="2" fill="none" />
+  <path d="M 620,320 L 620,340 L 600,340" stroke="#2D2D3A" stroke-width="2" fill="none" />
+</svg>
