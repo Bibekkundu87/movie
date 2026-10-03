@@ -78,12 +78,21 @@ class VideoMetadataCache {
   hasCachedData(): boolean {
     return this.cache !== null;
   }
+
+  /**
+   * Fast sync lookup for a video in metadata cache
+   */
+  getVideoById(id: string): Video | undefined {
+    return this.cache?.data.find((v) => v.id === id);
+  }
 }
 
 // Global singleton to persist across module re-evaluations
 const globalForCache = globalThis as unknown as { __videoMetadataCache?: VideoMetadataCache };
 export const videoMetadataCache =
-  globalForCache.__videoMetadataCache || new VideoMetadataCache();
+  (globalForCache.__videoMetadataCache && typeof globalForCache.__videoMetadataCache.getVideoById === "function")
+    ? globalForCache.__videoMetadataCache
+    : new VideoMetadataCache();
 
 if (process.env.NODE_ENV !== "production") {
   globalForCache.__videoMetadataCache = videoMetadataCache;

@@ -42,9 +42,9 @@ export function FeaturedVideo({ video }: FeaturedVideoProps) {
         <div className="absolute inset-0 bg-gradient-to-r from-[#101014] via-[#101014]/80 to-transparent" />
 
         {/* Content Box */}
-        <div className="absolute inset-0 p-6 sm:p-10 lg:p-14 flex flex-col justify-end max-w-2xl">
+        <div className="absolute inset-0 p-4 sm:p-10 lg:p-14 flex flex-col justify-end max-w-2xl">
           {/* Unboxed Metadata (Zero-pill discipline) */}
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-[#EF3B4F] font-medium tracking-wide mb-2.5">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-[#EF3B4F] font-medium tracking-wide mb-2">
             <span className="text-white font-semibold">Featured from Drive</span>
             <span aria-hidden="true" className="text-[#555566]">·</span>
             {durationStr && <span>{durationStr}</span>}
@@ -55,29 +55,29 @@ export function FeaturedVideo({ video }: FeaturedVideoProps) {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3 text-balance">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight mb-2 sm:mb-3 text-balance line-clamp-2 sm:line-clamp-none">
             {video.title}
           </h1>
 
           {/* Description */}
           {video.description && (
-            <p className="text-sm sm:text-base text-[#B0B0C0] line-clamp-2 sm:line-clamp-3 mb-6 leading-relaxed">
+            <p className="text-xs sm:text-base text-[#B0B0C0] line-clamp-2 sm:line-clamp-3 mb-4 sm:mb-6 leading-relaxed">
               {video.description}
             </p>
           )}
 
           {/* Action CTAs */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <Link href={ROUTES.WATCH(video.id)}>
-              <Button size="lg" className="shadow-lg shadow-[#EF3B4F]/20">
-                <Play className="w-5 h-5 fill-current mr-2" />
+              <Button size="lg" className="h-10 sm:h-11 px-4 sm:px-6 shadow-lg shadow-[#EF3B4F]/20 text-xs sm:text-sm">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current mr-2" />
                 Play Now
               </Button>
             </Link>
 
             <Link href={ROUTES.WATCH(video.id)}>
-              <Button variant="secondary" size="lg">
-                <Info className="w-5 h-5 mr-2" />
+              <Button variant="secondary" size="lg" className="h-10 sm:h-11 px-4 sm:px-6 text-xs sm:text-sm">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Details
               </Button>
             </Link>

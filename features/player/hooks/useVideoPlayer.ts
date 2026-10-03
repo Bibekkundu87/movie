@@ -168,6 +168,7 @@ export function useVideoPlayer(initialDuration?: number) {
   const play = useCallback(async () => {
     const video = videoRef.current;
     if (!video) return;
+    setState((prev) => ({ ...prev, hasStarted: true }));
     try {
       await video.play();
     } catch (err) {

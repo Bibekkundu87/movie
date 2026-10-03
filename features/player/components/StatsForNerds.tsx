@@ -33,17 +33,17 @@ export function StatsForNerds({ isOpen, onClose, state, title }: StatsForNerdsPr
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="absolute top-4 left-4 z-40 w-72 sm:w-80 p-3 rounded-lg bg-black/85 backdrop-blur-md border border-white/15 text-white font-mono text-[11px] shadow-2xl select-none"
+      className="absolute top-2 left-2 right-2 sm:right-auto sm:top-4 sm:left-4 z-40 sm:w-80 max-h-[calc(100%-1rem)] overflow-y-auto p-2.5 sm:p-3 rounded-lg bg-black/90 backdrop-blur-md border border-white/20 text-white font-mono text-[10px] sm:text-[11px] shadow-2xl select-none"
     >
-      <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-2">
+      <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-2 sticky top-0 bg-black/90 pt-0.5">
         <span className="font-bold text-white/90">Stats for nerds</span>
         <button
           type="button"
           onClick={onClose}
-          className="text-white/60 hover:text-white p-0.5 rounded hover:bg-white/10"
+          className="text-white/70 hover:text-white p-1 rounded-md hover:bg-white/10"
           aria-label="Close stats"
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-4 h-4" />
         </button>
       </div>
 

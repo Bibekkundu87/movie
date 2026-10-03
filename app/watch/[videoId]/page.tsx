@@ -13,6 +13,9 @@ import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { useVideos } from "@/features/library/hooks/useVideos";
 import { formatDuration, formatBytes, formatDate } from "@/lib/utils";
+import useSWR from "swr";
+import { Video } from "@/types/video";
+import { videoService } from "@/services/videoService";
 
 export default function WatchPage({
   params,
@@ -23,6 +26,16 @@ export default function WatchPage({
   const { videos, isLoading, refresh } = useVideos();
   const [copied, setCopied] = useState(false);
 
+  // Fast single-video resolver to mount player instantly without waiting for whole library
+  const { data: directVideo, isLoading: isDirectLoading } = useSWR<Video>(
+    videoId ? `/api/videos/${videoId}` : null,
+    async () => videoService.getVideoById(videoId),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
+    }
+  );
+
   const handleShare = () => {
     if (typeof window !== "undefined") {
       navigator.clipboard.writeText(window.location.href);
@@ -31,13 +44,13 @@ export default function WatchPage({
     }
   };
 
-  // Find the requested video from the synchronized library
-  const currentVideo = videos.find((v) => v.id === videoId);
+  // Find requested video from synchronized library or direct single-video lookup
+  const currentVideo = videos.find((v) => v.id === videoId) || directVideo;
 
   // Other videos in the library for quick binge watching
   const otherVideos = videos.filter((v) => v.id !== videoId);
 
-  if (isLoading && videos.length === 0) {
+  if (!currentVideo && (isLoading || isDirectLoading)) {
     return (
       <div className="min-h-screen bg-[#101014] text-white">
         <Header />
@@ -52,7 +65,7 @@ export default function WatchPage({
   }
 
   // Handle deleted or unavailable video gracefully
-  if (!currentVideo && !isLoading) {
+  if (!currentVideo && !isLoading && !isDirectLoading) {
     return (
       <div className="min-h-screen bg-[#101014] text-white">
         <Header />
@@ -97,12 +110,12 @@ export default function WatchPage({
     <div className="min-h-screen bg-[#101014] text-white">
       <Header />
 
-      <PageContainer className="pt-6">
+      <PageContainer className="pt-3 sm:pt-6 px-3 sm:px-6 lg:px-8">
         {/* Back navigation button */}
-        <div className="mb-4">
+        <div className="mb-3 sm:mb-4">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-medium text-[#8E8EA0] hover:text-white transition-colors group"
+            className="inline-flex items-center gap-2 text-xs font-medium text-[#8E8EA0] hover:text-white transition-colors group py-1"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             <span>Back to Video Library</span>
@@ -110,7 +123,7 @@ export default function WatchPage({
         </div>
 
         {/* Video Player */}
-        <div className="w-full mb-6">
+        <div className="w-full mb-4 sm:mb-6">
           <VideoPlayer
             streamUrl={currentVideo.streamUrl}
             title={currentVideo.title}
@@ -121,19 +134,19 @@ export default function WatchPage({
         </div>
 
         {/* Video Details Header & Action Bar */}
-        <div className="space-y-4 pb-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+        <div className="space-y-3 sm:space-y-4 pb-8 sm:pb-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-tight">
               {currentVideo.title}
             </h1>
 
             {/* Actions: Share / Copy link */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handleShare}
-                className="text-xs"
+                className="text-xs h-8 px-3"
               >
                 {copied ? (
                   <>
@@ -151,7 +164,7 @@ export default function WatchPage({
           </div>
 
           {/* Unboxed Metadata Strip */}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[#8E8EA0] pt-1 pb-2">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-[#8E8EA0] pt-0.5 pb-1">
             {dateFormatted && (
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[#636375]" />
@@ -191,7 +204,7 @@ export default function WatchPage({
           </div>
 
           {/* Description Box */}
-          <div className="p-4 rounded-xl bg-[#14141C] border border-[#20202C] text-sm text-[#A0A0B0] leading-relaxed">
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#14141C] border border-[#20202C] text-xs sm:text-sm text-[#A0A0B0] leading-relaxed">
             <p>
               {currentVideo.description ||
                 "No description provided for this video. Streaming directly from Google Drive."}
@@ -201,11 +214,11 @@ export default function WatchPage({
 
         {/* More from Drive Library */}
         {otherVideos.length > 0 && (
-          <div className="pt-10 border-t border-[#1E1E28]">
-            <h3 className="text-base font-bold text-white mb-4">
+          <div className="pt-8 sm:pt-10 border-t border-[#1E1E28]">
+            <h3 className="text-sm sm:text-base font-bold text-white mb-3 sm:mb-4">
               More from Google Drive Library
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {otherVideos.slice(0, 4).map((video) => (
                 <VideoCard key={video.id} video={video} />
               ))}

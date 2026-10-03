@@ -16,7 +16,7 @@ export function SearchBar({
   onQueryChange,
   onClear,
   resultCount,
-  placeholder = "Search videos in Google Drive library...",
+  placeholder = "Search videos in library...",
 }: SearchBarProps) {
   const isFiltering = query.trim().length > 0;
 
@@ -30,17 +30,17 @@ export function SearchBar({
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-[#16161E] text-white text-sm pl-10 pr-10 py-2.5 rounded-lg border border-[#262633] focus:border-[#EF3B4F] focus:outline-none focus:ring-1 focus:ring-[#EF3B4F] placeholder-[#636375] transition-all"
+          className="w-full bg-[#16161E] text-white text-base sm:text-sm pl-10 pr-10 py-2.5 rounded-xl border border-[#262633] focus:border-[#EF3B4F] focus:outline-none focus:ring-1 focus:ring-[#EF3B4F] placeholder-[#636375] transition-all"
         />
 
         {query && (
           <button
             type="button"
             onClick={onClear}
-            className="absolute right-3 p-1 rounded-md text-[#8E8EA0] hover:text-white hover:bg-[#232330] transition-colors focus-visible:outline-none"
+            className="absolute right-2.5 p-1.5 rounded-md text-[#8E8EA0] hover:text-white hover:bg-[#232330] transition-colors focus-visible:outline-none"
             aria-label="Clear search query"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>

@@ -80,6 +80,32 @@ export function VideoControls({
     onUserInteraction();
   };
 
+  const handleTimelineTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (duration <= 0 || !e.touches[0]) return;
+    setIsDragging(true);
+    const pos = calculatePosition(e.touches[0].clientX);
+    setHoverPosition(pos * 100);
+    setHoverTime(pos * duration);
+    controls.seek(pos * duration);
+    onUserInteraction();
+  };
+
+  const handleTimelineTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging || duration <= 0 || !e.touches[0]) return;
+    const pos = calculatePosition(e.touches[0].clientX);
+    setHoverPosition(pos * 100);
+    setHoverTime(pos * duration);
+    controls.seek(pos * duration);
+    onUserInteraction();
+  };
+
+  const handleTimelineTouchEnd = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      setHoverTime(null);
+    }
+  };
+
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!isDragging || duration <= 0) return;
@@ -97,14 +123,36 @@ export function VideoControls({
       }
     };
 
+    const handleGlobalTouchMove = (e: TouchEvent) => {
+      if (!isDragging || duration <= 0 || !e.touches[0]) return;
+      const pos = calculatePosition(e.touches[0].clientX);
+      setHoverPosition(pos * 100);
+      setHoverTime(pos * duration);
+      controls.seek(pos * duration);
+      onUserInteraction();
+    };
+
+    const handleGlobalTouchEnd = () => {
+      if (isDragging) {
+        setIsDragging(false);
+        setHoverTime(null);
+      }
+    };
+
     if (isDragging) {
       window.addEventListener("mousemove", handleGlobalMouseMove);
       window.addEventListener("mouseup", handleGlobalMouseUp);
+      window.addEventListener("touchmove", handleGlobalTouchMove, { passive: true });
+      window.addEventListener("touchend", handleGlobalTouchEnd);
+      window.addEventListener("touchcancel", handleGlobalTouchEnd);
     }
 
     return () => {
       window.removeEventListener("mousemove", handleGlobalMouseMove);
       window.removeEventListener("mouseup", handleGlobalMouseUp);
+      window.removeEventListener("touchmove", handleGlobalTouchMove);
+      window.removeEventListener("touchend", handleGlobalTouchEnd);
+      window.removeEventListener("touchcancel", handleGlobalTouchEnd);
     };
   }, [isDragging, calculatePosition, controls, duration, onUserInteraction]);
 
@@ -112,7 +160,7 @@ export function VideoControls({
 
   return (
     <div
-      className={`absolute inset-x-0 bottom-0 z-20 px-4 sm:px-6 pb-4 pt-16 bg-gradient-to-t from-black/95 via-black/60 to-transparent transition-opacity duration-300 ${
+      className={`absolute inset-x-0 bottom-0 z-20 px-3 sm:px-6 pb-3 sm:pb-4 pt-16 bg-gradient-to-t from-black/95 via-black/60 to-transparent transition-opacity duration-300 ${
         isVisible || isSettingsOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       onClick={(e) => e.stopPropagation()}
@@ -127,16 +175,20 @@ export function VideoControls({
         )}
       </div>
 
-      {/* Scrub / Progress Bar */}
+      {/* Scrub / Progress Bar with touch-friendly hit area */}
       <div
         ref={timelineRef}
         onMouseMove={handleTimelineMouseMove}
         onMouseLeave={handleTimelineMouseLeave}
         onMouseDown={handleTimelineMouseDown}
-        className="relative w-full h-4 flex items-center cursor-pointer group mb-2.5 select-none"
+        onTouchStart={handleTimelineTouchStart}
+        onTouchMove={handleTimelineTouchMove}
+        onTouchEnd={handleTimelineTouchEnd}
+        onTouchCancel={handleTimelineTouchEnd}
+        className="relative w-full h-6 sm:h-4 flex items-center cursor-pointer group mb-1.5 sm:mb-2.5 select-none touch-none"
       >
         {/* Track Background */}
-        <div className="w-full h-1 group-hover:h-2 bg-white/20 rounded-full overflow-hidden transition-all duration-150 relative">
+        <div className="w-full h-1.5 sm:h-1 group-hover:h-2 bg-white/20 rounded-full overflow-hidden transition-all duration-150 relative">
           {/* Buffered Progress */}
           <div
             className="absolute left-0 top-0 bottom-0 bg-white/35 transition-all duration-150"
@@ -158,15 +210,15 @@ export function VideoControls({
           />
         )}
 
-        {/* Playhead Scrubber Handle (YouTube style red knob) */}
+        {/* Playhead Scrubber Handle */}
         <div
-          className={`absolute w-3.5 h-3.5 bg-[#EF3B4F] border-2 border-white rounded-full shadow-lg -translate-x-1/2 transition-transform duration-150 pointer-events-none ${
-            isDragging ? "scale-125 opacity-100" : "opacity-0 group-hover:opacity-100"
+          className={`absolute w-3.5 h-3.5 sm:w-3.5 sm:h-3.5 bg-[#EF3B4F] border-2 border-white rounded-full shadow-lg -translate-x-1/2 transition-transform duration-150 pointer-events-none ${
+            isDragging ? "scale-125 opacity-100" : "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
           }`}
           style={{ left: `${Math.min(100, Math.max(0, progressPercent))}%` }}
         />
 
-        {/* Hover Time Preview Tooltip */}
+        {/* Hover / Touch Time Preview Tooltip */}
         {hoverTime !== null && (
           <div
             className="absolute -top-7 -translate-x-1/2 bg-black/90 text-white text-[11px] font-mono px-2 py-0.5 rounded shadow-lg border border-white/10 pointer-events-none tabular-nums"
@@ -178,16 +230,16 @@ export function VideoControls({
       </div>
 
       {/* Controls Bar */}
-      <div className="flex items-center justify-between gap-3 text-white">
-        {/* Left Side: Playback and Volume */}
-        <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center justify-between gap-1 sm:gap-3 text-white">
+        {/* Left Side: Playback, Seek, Volume, Time */}
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* Play/Pause */}
           <button
             type="button"
             onClick={controls.togglePlay}
             aria-label={state.isPlaying ? "Pause video (k)" : "Play video (k)"}
             title={state.isPlaying ? "Pause (k)" : "Play (k)"}
-            className="p-1.5 hover:text-[#EF3B4F] transition-colors focus-visible:outline-none rounded hover:bg-white/10"
+            className="p-2 sm:p-1.5 hover:text-[#EF3B4F] active:scale-90 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10"
           >
             {state.isPlaying ? (
               <Pause className="w-5 h-5 fill-current" />
@@ -202,7 +254,7 @@ export function VideoControls({
             onClick={() => controls.seekBy(-PLAYER_CONFIG.SEEK_STEP_SECONDS)}
             aria-label="Seek back 10 seconds (j)"
             title="Rewind 10s (j)"
-            className="p-1.5 text-white/85 hover:text-white transition-colors focus-visible:outline-none rounded hover:bg-white/10"
+            className="p-2 sm:p-1.5 text-white/85 hover:text-white active:scale-90 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -213,19 +265,19 @@ export function VideoControls({
             onClick={() => controls.seekBy(PLAYER_CONFIG.FAST_FORWARD_SECONDS)}
             aria-label="Seek forward 10 seconds (l)"
             title="Fast Forward 10s (l)"
-            className="p-1.5 text-white/85 hover:text-white transition-colors focus-visible:outline-none rounded hover:bg-white/10"
+            className="p-2 sm:p-1.5 text-white/85 hover:text-white active:scale-90 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10"
           >
             <RotateCw className="w-4 h-4" />
           </button>
 
-          {/* Volume Control with hover slider */}
+          {/* Volume Control with hover slider on desktop */}
           <div className="flex items-center group/vol">
             <button
               type="button"
               onClick={controls.toggleMute}
               aria-label={state.isMuted ? "Unmute (m)" : "Mute (m)"}
               title={state.isMuted ? "Unmute (m)" : "Mute (m)"}
-              className="p-1.5 text-white/85 hover:text-white transition-colors focus-visible:outline-none rounded hover:bg-white/10"
+              className="p-2 sm:p-1.5 text-white/85 hover:text-white active:scale-90 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10"
             >
               {state.isMuted || state.volume === 0 ? (
                 <VolumeX className="w-4 h-4 text-red-400" />
@@ -236,7 +288,8 @@ export function VideoControls({
               )}
             </button>
 
-            <div className="w-0 overflow-hidden group-hover/vol:w-20 sm:group-hover/vol:w-24 group-focus-within/vol:w-24 transition-all duration-200 flex items-center px-1">
+            {/* Volume slider (desktop only) */}
+            <div className="hidden sm:flex w-0 overflow-hidden group-hover/vol:w-20 sm:group-hover/vol:w-24 group-focus-within/vol:w-24 transition-all duration-200 items-center px-1">
               <input
                 type="range"
                 min="0"
@@ -251,30 +304,30 @@ export function VideoControls({
           </div>
 
           {/* Timestamp Display */}
-          <div className="text-xs font-mono tabular-nums text-white/90 ml-1">
+          <div className="text-[11px] sm:text-xs font-mono tabular-nums text-white/90 ml-0.5 sm:ml-1 whitespace-nowrap">
             <span>{formatPlayerTime(state.currentTime)}</span>
-            <span className="text-white/40 mx-1">/</span>
+            <span className="text-white/40 mx-0.5 sm:mx-1">/</span>
             <span>{formatPlayerTime(state.duration)}</span>
           </div>
         </div>
 
         {/* Right Side: Options, Settings, PiP, Theater, Fullscreen */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Settings Cog with YouTube popup */}
+          {/* Settings Cog */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setIsSettingsOpen((prev) => !prev)}
               aria-label="Settings"
               title="Settings"
-              className={`p-1.5 transition-colors focus-visible:outline-none rounded hover:bg-white/10 ${
+              className={`p-2 sm:p-1.5 active:scale-90 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10 ${
                 isSettingsOpen ? "text-[#EF3B4F]" : "text-white/85 hover:text-white"
               }`}
             >
               <Settings className={`w-4 h-4 ${isSettingsOpen ? "rotate-45" : ""} transition-transform`} />
             </button>
 
-            {/* YouTube Settings Popover */}
+            {/* YouTube Settings Popover / Mobile Sheet */}
             <SettingsMenu
               isOpen={isSettingsOpen}
               onClose={() => setIsSettingsOpen(false)}
@@ -284,24 +337,24 @@ export function VideoControls({
             />
           </div>
 
-          {/* Picture-in-Picture */}
+          {/* Picture-in-Picture (hidden on mobile phones) */}
           <button
             type="button"
             onClick={controls.togglePip}
             aria-label="Miniplayer (i)"
             title="Miniplayer (i)"
-            className="p-1.5 text-white/85 hover:text-white transition-colors focus-visible:outline-none rounded hover:bg-white/10 hidden sm:block"
+            className="p-2 sm:p-1.5 text-white/85 hover:text-white active:scale-90 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10 hidden md:block"
           >
             <Tv className="w-4 h-4" />
           </button>
 
-          {/* Theater Mode */}
+          {/* Theater Mode (hidden on mobile phones) */}
           <button
             type="button"
             onClick={controls.toggleTheaterMode}
             aria-label="Theater mode (t)"
             title="Theater mode (t)"
-            className={`p-1.5 transition-colors focus-visible:outline-none rounded hover:bg-white/10 hidden sm:block ${
+            className={`p-2 sm:p-1.5 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10 hidden md:block ${
               state.isTheaterMode ? "text-[#EF3B4F]" : "text-white/85 hover:text-white"
             }`}
           >
@@ -314,7 +367,7 @@ export function VideoControls({
             onClick={controls.toggleFullscreen}
             aria-label={state.isFullscreen ? "Exit Fullscreen (f)" : "Enter Fullscreen (f)"}
             title={state.isFullscreen ? "Exit full screen (f)" : "Full screen (f)"}
-            className="p-1.5 text-white/85 hover:text-white transition-colors focus-visible:outline-none rounded hover:bg-white/10"
+            className="p-2 sm:p-1.5 text-white/85 hover:text-white active:scale-90 transition-all focus-visible:outline-none rounded-lg hover:bg-white/10"
           >
             {state.isFullscreen ? (
               <Minimize className="w-4 h-4" />

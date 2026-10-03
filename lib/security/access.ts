@@ -6,6 +6,7 @@
 import { DriveVideoFile, getDriveFile } from "@/lib/drive/files";
 import { requireDriveConfig, getEnvConfig } from "@/lib/config/env";
 import { mockVideoStore } from "@/services/mockVideos";
+import { videoMetadataCache } from "@/lib/videos/cache";
 
 // Valid Google Drive file ID format (alphanumeric, hyphens, underscores)
 const GOOGLE_DRIVE_ID_REGEX = /^[a-zA-Z0-9_-]{10,128}$/;
@@ -25,6 +26,23 @@ export interface FileAccessCheck {
   file?: DriveVideoFile;
 }
 
+// In-memory cache for streaming access checks to eliminate 500-1500ms delay per range request
+interface CachedAccess {
+  check: FileAccessCheck;
+  expiresAt: number;
+}
+
+const accessCache = new Map<string, CachedAccess>();
+const ACCESS_CACHE_TTL_MS = 600_000; // 10 minutes cache to avoid mid-stream delay
+
+export function invalidateAccessCache(fileId?: string): void {
+  if (fileId) {
+    accessCache.delete(fileId);
+  } else {
+    accessCache.clear();
+  }
+}
+
 /**
  * Verifies that a requested file belongs directly to the configured Google Drive folder,
  * is an active video, is not trashed, and is allowed to be downloaded/streamed.
@@ -41,6 +59,13 @@ export async function verifyVideoAccess(fileId: string): Promise<FileAccessCheck
     };
   }
 
+  // Check fast in-memory access cache to avoid redundant Google Drive metadata roundtrips
+  const now = Date.now();
+  const cached = accessCache.get(fileId);
+  if (cached && cached.expiresAt > now) {
+    return cached.check;
+  }
+
   // If in mock mode, validate against the mock store
   if (envResult.config?.isMockMode) {
     const mockVideo = mockVideoStore.getVideoById(fileId);
@@ -51,10 +76,33 @@ export async function verifyVideoAccess(fileId: string): Promise<FileAccessCheck
         reason: "Video not found in mock library.",
       };
     }
-    return {
+    const result: FileAccessCheck = {
       authorized: true,
       status: 200,
     };
+    accessCache.set(fileId, { check: result, expiresAt: now + ACCESS_CACHE_TTL_MS });
+    return result;
+  }
+
+  // Check if video is already present in the active videoMetadataCache
+  const knownVideo =
+    typeof videoMetadataCache?.getVideoById === "function"
+      ? videoMetadataCache.getVideoById(fileId)
+      : undefined;
+  if (knownVideo) {
+    const result: FileAccessCheck = {
+      authorized: true,
+      status: 200,
+      file: {
+        id: knownVideo.id,
+        name: knownVideo.title,
+        mimeType: knownVideo.mimeType || "video/mp4",
+        size: knownVideo.size?.toString(),
+        capabilities: { canDownload: true },
+      },
+    };
+    accessCache.set(fileId, { check: result, expiresAt: now + ACCESS_CACHE_TTL_MS });
+    return result;
   }
 
   const config = requireDriveConfig();
@@ -107,9 +155,12 @@ export async function verifyVideoAccess(fileId: string): Promise<FileAccessCheck
     };
   }
 
-  return {
+  const result: FileAccessCheck = {
     authorized: true,
     status: 200,
     file,
   };
+
+  accessCache.set(fileId, { check: result, expiresAt: now + ACCESS_CACHE_TTL_MS });
+  return result;
 }

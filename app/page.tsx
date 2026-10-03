@@ -47,7 +47,7 @@ export default function HomePage() {
         isSimulatorOpen={isSimulatorOpen}
       />
 
-      <PageContainer className="pt-6">
+      <PageContainer className="pt-3 sm:pt-6 px-3 sm:px-6 lg:px-8">
         {/* Initial Loading Skeleton */}
         {isLoading && videos.length === 0 ? (
           <div className="space-y-8">

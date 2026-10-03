@@ -14,6 +14,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Prevent blue highlight flash on mobile taps */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area support for notched mobile displays */
+.safe-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-pt {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 /* Custom dark scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

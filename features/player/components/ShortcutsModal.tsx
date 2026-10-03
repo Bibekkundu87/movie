@@ -49,7 +49,7 @@ export function ShortcutsModal({ isOpen, onClose }: ShortcutsModalProps) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg rounded-2xl bg-[#14141C] border border-[#262638] shadow-2xl p-6 text-white max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-2xl bg-[#14141C] border border-[#262638] shadow-2xl p-4 sm:p-6 text-white max-h-[90vh] overflow-y-auto"
       >
         <div className="flex items-center justify-between pb-4 border-b border-[#242436] mb-4">
           <div className="flex items-center gap-2.5">

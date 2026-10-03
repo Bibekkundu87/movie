@@ -76,7 +76,13 @@ export async function handleVideoStreamRequest(
     }
 
     // In mock mode, 307 temporary redirect enables the native HTML5 player to stream directly
-    return Response.redirect(mockVideo.streamUrl, 307);
+    return new Response(null, {
+      status: 307,
+      headers: {
+        Location: mockVideo.streamUrl,
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
   }
 
   // 1. Verify viewer authorization and folder membership
@@ -117,7 +123,7 @@ export async function handleVideoStreamRequest(
   const responseHeaders: Record<string, string> = {
     "Content-Type": mimeType,
     "Accept-Ranges": "bytes",
-    "Cache-Control": "private, no-cache, no-store, must-revalidate",
+    "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
   };
 
   if (rangeResult.status === 206) {

@@ -26,7 +26,7 @@ export function VideoCard({ video, priority = false }: VideoCardProps) {
   return (
     <Link
       href={ROUTES.WATCH(video.id)}
-      className="group flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF3B4F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101014] rounded-lg transition-transform duration-200"
+      className="group flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EF3B4F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#101014] rounded-lg active:scale-[0.98] transition-transform duration-150"
     >
       {/* 16:9 Thumbnail Container */}
       <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-[#16161E] border border-[#23232E] group-hover:border-[#38384A] transition-colors duration-200">
@@ -54,20 +54,20 @@ export function VideoCard({ video, priority = false }: VideoCardProps) {
 
         {/* Subtle duration badge placed quietly in bottom corner */}
         {durationStr && (
-          <div className="absolute bottom-1.5 right-1.5 bg-black/80 backdrop-blur-xs text-white text-[11px] font-mono tabular-nums px-1.5 py-0.5 rounded">
+          <div className="absolute bottom-1 sm:bottom-1.5 right-1 sm:right-1.5 bg-black/80 backdrop-blur-xs text-white text-[10px] sm:text-[11px] font-mono tabular-nums px-1.5 py-0.5 rounded">
             {durationStr}
           </div>
         )}
       </div>
 
       {/* Video Information (No pill sandwiches, unboxed metadata) */}
-      <div className="mt-2.5 px-0.5">
-        <h4 className="text-sm font-semibold text-white tracking-tight leading-snug line-clamp-2 group-hover:text-[#EF3B4F] transition-colors">
+      <div className="mt-2 sm:mt-2.5 px-0.5">
+        <h4 className="text-xs sm:text-sm font-semibold text-white tracking-tight leading-snug line-clamp-2 group-hover:text-[#EF3B4F] transition-colors">
           {video.title}
         </h4>
 
         {/* Unboxed Metadata with Typographic Separators */}
-        <div className="flex items-center gap-1.5 mt-1 text-[12px] text-[#8E8EA0] leading-none">
+        <div className="flex items-center gap-1.5 mt-1 text-[11px] sm:text-[12px] text-[#8E8EA0] leading-none">
           {dateStr && <span>{dateStr}</span>}
           {dateStr && sizeStr && <span aria-hidden="true" className="text-[#4E4E60]">·</span>}
           {sizeStr && <span className="font-mono tabular-nums">{sizeStr}</span>}
