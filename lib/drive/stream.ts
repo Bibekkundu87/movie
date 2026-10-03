@@ -32,8 +32,9 @@ export function parseRangeHeader(
   const rawStart = parts[0]?.trim();
   const rawEnd = parts[1]?.trim();
 
+  const DEFAULT_CHUNK_BYTES = 2 * 1024 * 1024; // 2MB incremental chunking
   let start = parseInt(rawStart, 10);
-  let end = rawEnd ? parseInt(rawEnd, 10) : fileSize - 1;
+  let end = rawEnd ? parseInt(rawEnd, 10) : Math.min(start + DEFAULT_CHUNK_BYTES - 1, fileSize - 1);
 
   // Suffix byte range: bytes=-500 (last 500 bytes)
   if (isNaN(start) && !isNaN(end)) {
@@ -171,6 +172,9 @@ export async function handleVideoStreamRequest(
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
+    if (signal?.aborted || msg.includes("aborted") || msg.includes("ERR_STREAM_PREMATURE_CLOSE")) {
+      return new Response(null, { status: 499 });
+    }
     if (msg.includes("416")) {
       return new Response("Range Not Satisfiable", {
         status: 416,

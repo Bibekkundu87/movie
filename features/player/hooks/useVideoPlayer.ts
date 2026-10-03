@@ -168,16 +168,57 @@ export function useVideoPlayer(initialDuration?: number) {
   const play = useCallback(async () => {
     const video = videoRef.current;
     if (!video) return;
-    setState((prev) => ({ ...prev, hasStarted: true }));
+
+    // Wake up video pipeline if still uninitialized
+    if (video.readyState === 0) {
+      // Intentionally omitting video.load() here because calling it synchronously
+      // right before video.play() breaks the user interaction token on iOS/Android
+      // and causes a NotAllowedError. video.play() automatically triggers a load anyway.
+    }
+
+    // Immediately update player state so UI responds in 0ms
+    setState((prev) => ({
+      ...prev,
+      hasStarted: true,
+      isPlaying: true,
+      isBuffering: video.readyState < 3,
+      error: null,
+    }));
+
     try {
-      await video.play();
-    } catch (err) {
-      console.warn("Autoplay / play request rejected:", err);
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        await playPromise;
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("Initial play request rejected, attempting muted autoplay recovery:", msg);
+
+      // Autoplay with sound restricted by browser policy -> recover with muted stream
+      if (
+        msg.includes("NotAllowedError") ||
+        msg.includes("user didn't interact") ||
+        video.muted === false
+      ) {
+        try {
+          video.muted = true;
+          setState((prev) => ({ ...prev, isMuted: true }));
+          await video.play();
+        } catch (retryErr) {
+          console.error("Muted playback fallback also failed:", retryErr);
+          setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
+        }
+      } else {
+        setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
+      }
     }
   }, []);
 
   const pause = useCallback(() => {
-    videoRef.current?.pause();
+    const video = videoRef.current;
+    if (!video) return;
+    video.pause();
+    setState((prev) => ({ ...prev, isPlaying: false, isBuffering: false }));
   }, []);
 
   const togglePlay = useCallback(() => {

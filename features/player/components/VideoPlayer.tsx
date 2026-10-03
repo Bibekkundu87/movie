@@ -356,9 +356,9 @@ export function VideoPlayer({
                 showControlsTemporarily();
               }}
               aria-label="Rewind 10 seconds"
-              className="pointer-events-auto touch-manipulation w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/65 hover:bg-black/85 active:scale-85 text-white flex flex-col items-center justify-center backdrop-blur-md border border-white/20 transition-all shadow-2xl group/seek"
+              className="pointer-events-auto touch-manipulation w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/65 md:hover:bg-black/85 active:scale-85 text-white flex flex-col items-center justify-center backdrop-blur-md border border-white/20 transition-all shadow-2xl group/seek"
             >
-              <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 group-hover/seek:-rotate-12 transition-transform" />
+              <RotateCcw className="w-5 h-5 sm:w-6 sm:h-6 md:group-hover/seek:-rotate-12 transition-transform" />
               <span className="text-[9px] font-bold mt-0.5 tracking-tighter">10</span>
             </button>
 
@@ -373,9 +373,11 @@ export function VideoPlayer({
                 showControlsTemporarily();
               }}
               aria-label={state.isPlaying ? "Pause video" : "Play video"}
-              className="pointer-events-auto touch-manipulation w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black/75 hover:bg-black/90 active:scale-90 text-white flex items-center justify-center backdrop-blur-md border border-white/25 shadow-2xl ring-4 ring-white/10 transition-transform duration-150"
+              className="pointer-events-auto touch-manipulation w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black/75 md:hover:bg-black/90 active:scale-90 text-white flex items-center justify-center backdrop-blur-md border border-white/25 shadow-2xl ring-4 ring-white/10 transition-transform duration-150"
             >
-              {state.isPlaying ? (
+              {state.isBuffering ? (
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-white/30 border-t-white animate-spin" />
+              ) : state.isPlaying ? (
                 <Pause className="w-8 h-8 sm:w-10 sm:h-10 fill-current" />
               ) : (
                 <Play className="w-8 h-8 sm:w-10 sm:h-10 fill-current ml-1" />
@@ -392,9 +394,9 @@ export function VideoPlayer({
                 showControlsTemporarily();
               }}
               aria-label="Fast forward 10 seconds"
-              className="pointer-events-auto touch-manipulation w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/65 hover:bg-black/85 active:scale-85 text-white flex flex-col items-center justify-center backdrop-blur-md border border-white/20 transition-all shadow-2xl group/seek"
+              className="pointer-events-auto touch-manipulation w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-black/65 md:hover:bg-black/85 active:scale-85 text-white flex flex-col items-center justify-center backdrop-blur-md border border-white/20 transition-all shadow-2xl group/seek"
             >
-              <RotateCw className="w-5 h-5 sm:w-6 sm:h-6 group-hover/seek:rotate-12 transition-transform" />
+              <RotateCw className="w-5 h-5 sm:w-6 sm:h-6 md:group-hover/seek:rotate-12 transition-transform" />
               <span className="text-[9px] font-bold mt-0.5 tracking-tighter">10</span>
             </button>
           </div>
